@@ -1,4 +1,4 @@
-# tiktok-video-scraper-mobile
+# tiktok video scraper (mobile)
 <div align="center">
   
 ![DescargarBot](https://www.descargarbot.com/v/download-github_tiktok.png)
