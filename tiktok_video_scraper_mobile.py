@@ -122,8 +122,7 @@ class TikTokVideoScraperMobile:
             print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
             raise SystemExit('error downloading video')
 
-        # this is a prefix for new features
-        path_filename = f'DescargarBot_{video_id}.mp4'
+        path_filename = f'{video_id}.mp4'
         try:
             with open(path_filename, 'wb') as f:
                 for chunk in video.iter_content(chunk_size=1024):
