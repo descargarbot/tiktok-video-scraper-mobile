@@ -169,7 +169,12 @@ if __name__ == "__main__":
     # use case example
 
     # set tiktok carrusel url
-    tiktok_url = 'your tiktok carrusel url'
+    tiktok_url = ''
+    if tiktok_url == '':
+        if len(sys.argv) < 2:
+            print('you must provide a tiktok carrusel url')
+            exit()
+        tiktok_url = sys.argv[1]
     
     # create scraper carrusel object
     tiktok_carrusel = TikTokCarruselScraperMobile()
