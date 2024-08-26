@@ -48,8 +48,11 @@
     downloaded_video_list = tiktok_video.download(tiktok_video_url, video_id)
  
     tiktok_video.tiktok_session.close()
-    
-<br>
+
+  or you can use the CLI
+  <br><br>
+  <code>python3 tiktok_video_scraper_mobile_v2.py TIKTOK_URL</code>
+<br><br>
 <h2>online</h2>
 <ul>
   ⤵
