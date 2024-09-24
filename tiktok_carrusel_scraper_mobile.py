@@ -54,7 +54,7 @@ class TikTokCarruselScraperMobile:
     def get_carrusel_data_by_id(self, carrusel_id: str) -> tuple:
         """ get carrusel urls """
 
-        # get iid-device_id from github repo file
+        # get iid-device_id from jsdelivr cdn
         try:
             iid_did = requests.get('https://cdn.jsdelivr.net/gh/descargarbot/tiktok-video-scraper-mobile@main/ids.json').json()
         except Exception as e:
