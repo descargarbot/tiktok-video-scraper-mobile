@@ -56,7 +56,7 @@ class TikTokCarruselScraperMobile:
 
         # get iid-device_id from github repo file
         try:
-            iid_did = requests.get('https://raw.githubusercontent.com/descargarbot/tiktok-video-scraper-mobile/main/ids.json').json()
+            iid_did = requests.get('https://cdn.jsdelivr.net/gh/descargarbot/tiktok-video-scraper-mobile@main/ids.json').json()
         except Exception as e:
             print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
             raise SystemExit('error getting tiktok ids')
