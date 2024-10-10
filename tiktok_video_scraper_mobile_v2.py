@@ -20,7 +20,7 @@ class TikTokVideoScraperMobile:
             'https': '',
         }
 
-        self.tiktok_regex = r'https?://www\.tiktok\.com/(?:embed|@([\w\.-]+)?/video)/(\d+)'
+        self.tiktok_regex = r'https?://www\.tiktok\.com/(?:embed|@([\w\.-]+)?/(video|photo))/(\d+)'
 
         self.tiktok_session = requests.Session()
     
@@ -43,7 +43,7 @@ class TikTokVideoScraperMobile:
                 raise SystemExit('error getting web url')
 
         try:
-            video_id = re.match(self.tiktok_regex, tiktok_url).group(2)
+            video_id = re.match(self.tiktok_regex, tiktok_url).group(3)
         except Exception as e:
             print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
             raise SystemExit('error getting video id')
@@ -54,7 +54,7 @@ class TikTokVideoScraperMobile:
     def get_video_data_by_video_id(self, video_id: str) -> tuple:
         """ get video url """
 
-        # get iid-device_id from jsdelivr cdn
+        # get iid-device_id from github repo file
         try:
             iid_did = requests.get('https://cdn.jsdelivr.net/gh/descargarbot/tiktok-video-scraper-mobile@main/ids.json').json()
         except Exception as e:
@@ -82,7 +82,10 @@ class TikTokVideoScraperMobile:
         params['iid'] = try_iid_did['iid']
         params['device_id'] = try_iid_did['device_id']
         iid_did.remove(try_iid_did)
-        
+
+        # contains music url and image urls from post
+        tiktok_video_urls = []
+
         while running:
             if iid_did:
                 try:
@@ -90,7 +93,7 @@ class TikTokVideoScraperMobile:
                     running = False
                 except Exception as e:
                     if try_count > 4: # 4 is the max retry per pair
-                        print(f'failed pair:{params['iid']},{params['device_id']}')
+                        print(f'failed pair:{params["iid"]},{params["device_id"]}')
 
                         try_iid_did = random.choice(iid_did)
                         params['iid'] = try_iid_did['iid']
@@ -105,50 +108,81 @@ class TikTokVideoScraperMobile:
                 raise SystemExit('user id and device id no longer works')
 
         try:
+            # for singles videos
             tiktok_video_url = json_video_data["aweme_details"][0]["video"]["bit_rate"][0]["play_addr"]["url_list"][0]
             thumbnail = json_video_data["aweme_details"][0]["video"]["dynamic_cover"]["url_list"][0]
+            tiktok_video_urls.append(tiktok_video_url)
         except Exception as e:
-            print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
-            raise SystemExit('error getting video url')
+
+            try:
+                # for carousel
+                if 'added_sound_music_info' in json_video_data["aweme_details"][0]:
+                    tiktok_carrusel_music = json_video_data["aweme_details"][0]["added_sound_music_info"]["play_url"]["url_list"][0]
+                    tiktok_video_urls.append(tiktok_carrusel_music)
+
+                thumbnail = json_video_data["aweme_details"][0]["image_post_info"]["image_post_cover"]["display_image"]["url_list"][0]
+
+                if 'images' in json_video_data["aweme_details"][0]["image_post_info"]:
+                    for image in json_video_data["aweme_details"][0]["image_post_info"]["images"]:
+                        image_url = image["display_image"]["url_list"][0]
+                        tiktok_video_urls.append(image_url)
+
+            except Exception as e:
+                print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
+                raise SystemExit('error getting video url')
         
-        return tiktok_video_url, thumbnail
+        return tiktok_video_urls, thumbnail
 
 
-    def download(self, tiktok_video_url: str, video_id: str) -> list:
+    def download(self, tiktok_video_urls: list, video_id: str) -> list:
         """ download the video
             video_is is just to name the file """
 
-        try:
-            video = self.tiktok_session.get(tiktok_video_url, headers=self.headers, proxies=self.proxies, stream=True)
-        except Exception as e:
-            print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
-            raise SystemExit('error downloading video')
+        path_filenames = []
+        count = 0
+        for tiktok_video_url in tiktok_video_urls:
+            try:
+                video = self.tiktok_session.get(tiktok_video_url, headers=self.headers, proxies=self.proxies, stream=True)
+            except Exception as e:
+                print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
+                raise SystemExit('error downloading video')
 
-        path_filename = f'{video_id}.mp4'
-        
-        try:
-            with open(path_filename, 'wb') as f:
-                for chunk in video.iter_content(chunk_size=1024):
-                    if chunk:
-                        f.write(chunk)
-                        f.flush()
-        except Exception as e:
-            print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
-            raise SystemExit('error writting video')
+            if len(tiktok_video_urls) == 1:
+                path_filename = f'{video_id}.mp4'
+            else:
+                if '.webp' in tiktok_video_url:
+                    path_filename = f'{video_id}___{count}.webp'
+                else:
+                    path_filename = f'{video_id}___{count}.mp4'
+            
+            try:
+                with open(path_filename, 'wb') as f:
+                    for chunk in video.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+                            f.flush()
+                path_filenames.append(path_filename)
+                count = count + 1
+            except Exception as e:
+                print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
+                raise SystemExit('error writting video')
 
-        return [path_filename]
+        return path_filenames
 
 
-    def get_video_filesize(self, video_url: str) -> str:
+    def get_video_filesize(self, video_urls: list) -> list:
         """ get file size of requested video """
+        filesizes = []
 
-        try:
-            video_size = self.tiktok_session.head(video_url, headers=self.headers, proxies=self.proxies)
-        except Exception as e:
-            print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
-            raise SystemExit('error getting video file size')
+        for video_url in video_urls:
+            try:
+                video_size = self.tiktok_session.head(video_url, headers=self.headers, proxies=self.proxies)
+                filesizes.append(video_size.headers['content-length'])
+            except Exception as e:
+                print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
+                raise SystemExit('error getting video file size')
 
-        return video_size.headers['content-length']
+        return filesizes
 
 ##################################################################
 
@@ -156,7 +190,7 @@ if __name__ == "__main__":
 
     # use case example
 
-    # set tiktok video url
+    # set tiktok url
     tiktok_url = ''
     if tiktok_url == '':
         if len(sys.argv) < 2:
@@ -174,14 +208,13 @@ if __name__ == "__main__":
     video_id = tiktok_video.get_video_id_by_url(tiktok_url)
     
     # get video url from video id
-    tiktok_video_url, video_thumbnail = tiktok_video.get_video_data_by_video_id(video_id)
+    tiktok_video_urls, video_thumbnail = tiktok_video.get_video_data_by_video_id(video_id)
 
     # get the video filesize
-    video_size = tiktok_video.get_video_filesize(tiktok_video_url)
-    print(f'filesize: ~{video_size} bytes')
+    videos_filesize = tiktok_video.get_video_filesize(tiktok_video_urls)
+    [print('filesize: ~' + filesize + ' bytes') for filesize in videos_filesize]
 
     # download video by url
-    downloaded_video_list = tiktok_video.download(tiktok_video_url, video_id)
+    downloaded_video_list = tiktok_video.download(tiktok_video_urls, video_id)
  
     tiktok_video.tiktok_session.close()
-
