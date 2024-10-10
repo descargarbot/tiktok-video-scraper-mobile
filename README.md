@@ -25,27 +25,27 @@
     #import the class TikTokVideoScraperMobile
     from tiktok_video_scraper_mobile_v2 import TikTokVideoScraperMobile
 
-    # set tiktok video url
-    tiktok_url = 'your tiktok video post'
-    
+    # set tiktok url
+    tiktok_url = 'your tiktok post'
+
     # create scraper video object
     tiktok_video = TikTokVideoScraperMobile()
 
     # set the proxy (optional, u can run it with ur own ip)
-    #tiktok_video.set_proxies('socks5://157.230.250.185:2144', 'socks5://157.230.250.185:2144')
+    #tiktok_video.set_proxies('', '')
 
     # get video id from url
     video_id = tiktok_video.get_video_id_by_url(tiktok_url)
     
     # get video url from video id
-    tiktok_video_url, video_thumbnail = tiktok_video.get_video_data_by_video_id(video_id)
+    tiktok_video_urls, video_thumbnail = tiktok_video.get_video_data_by_video_id(video_id)
 
     # get the video filesize
-    video_size = tiktok_video.get_video_filesize(tiktok_video_url)
-    print(f'filesize: ~{video_size} bytes')
+    videos_filesize = tiktok_video.get_video_filesize(tiktok_video_urls)
+    [print('filesize: ~' + filesize + ' bytes') for filesize in videos_filesize]
 
     # download video by url
-    downloaded_video_list = tiktok_video.download(tiktok_video_url, video_id)
+    downloaded_video_list = tiktok_video.download(tiktok_video_urls, video_id)
  
     tiktok_video.tiktok_session.close()
 
