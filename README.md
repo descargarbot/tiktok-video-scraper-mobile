@@ -53,7 +53,6 @@
   > you can use the CLI
   <br><br>
   > <code>python3 tiktok_video_scraper_mobile_v2.py TIKTOK_URL</code><br>or<br>
-  > <code>python3 tiktok_carrusel_scraper_mobile.py TIKTOK_URL</code><br>or<br>
   > <code>python3 tiktok_video_scraper_mobile.py TIKTOK_URL</code>
   
 <br>
