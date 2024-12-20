@@ -57,6 +57,9 @@ class TikTokVideoScraperMobile:
         # get iid-device_id from github repo file
         try:
             iid_did = requests.get('https://cdn.jsdelivr.net/gh/descargarbot/tiktok-video-scraper-mobile@main/ids.json').json()
+            # to test with a sample of 100 ids
+            random_sample = random.sample(iid_did, 100)
+            iid_did = random_sample
         except Exception as e:
             print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
             raise SystemExit('error getting tiktok ids')
@@ -153,7 +156,7 @@ class TikTokVideoScraperMobile:
                 if '.webp' in tiktok_video_url:
                     path_filename = f'{video_id}___{count}.webp'
                 else:
-                    path_filename = f'{video_id}___{count}.mp4'
+                    path_filename = f'{video_id}___{count}.mp3'
             
             try:
                 with open(path_filename, 'wb') as f:
