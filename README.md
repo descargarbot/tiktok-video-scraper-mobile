@@ -23,7 +23,7 @@
 <h2>use case example</h2>
 
     #import the class TikTokVideoScraperMobile
-    from tiktok_video_scraper_mobile_v2 import TikTokVideoScraperMobile
+    from tiktok_video_scraper_mobile_v3 import TikTokVideoScraperMobile
 
     # set tiktok url
     tiktok_url = 'your tiktok post'
@@ -52,8 +52,8 @@
   > [!NOTE]\
   > you can use the CLI
   <br><br>
-  > <code>python3 tiktok_video_scraper_mobile_v2.py TIKTOK_URL</code><br>or<br>
-  > <code>python3 tiktok_video_scraper_mobile.py TIKTOK_URL</code>
+  > <code>python3 tiktok_video_scraper_mobile_v3.py TIKTOK_URL</code><br>or<br>
+  > <code>python3 tiktok_video_scraper_mobile_v2.py TIKTOK_URL</code>
   
 <br>
 <h2>online</h2>
