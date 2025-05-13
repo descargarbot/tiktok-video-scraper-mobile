@@ -140,7 +140,7 @@ class TikTokVideoScraperMobile:
 
                 if 'images' in json_video_data["aweme_details"][0]["image_post_info"]:
                     for image in json_video_data["aweme_details"][0]["image_post_info"]["images"]:
-                        image_url = image["display_image"]["url_list"][0]
+                        image_url = image["user_watermark_image"]["url_list"][0]
                         tiktok_video_urls.append(image_url)
 
             except Exception as e:
@@ -153,12 +153,16 @@ class TikTokVideoScraperMobile:
     def download(self, tiktok_video_urls: list, video_id: str) -> list:
         """ download the video
             video_is is just to name the file """
-
+        
+        dl_headers = {
+            "User-Agent": "com.zhiliaoapp.musically/2023501030 (Linux; U; Android 14; en_US; Pixel 7 Pro; Build/TP1A.220624.014;tt-ok/3.12.13.4-tiktok)",
+        }
+        
         path_filenames = []
         count = 0
         for tiktok_video_url in tiktok_video_urls:
             try:
-                video = self.tiktok_session.get(tiktok_video_url, headers=self.headers, proxies=self.proxies, stream=True)
+                video = requests.get(tiktok_video_url, headers=dl_headers, proxies=self.proxies, stream=True)
             except Exception as e:
                 print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
                 raise SystemExit('error downloading video')
@@ -169,7 +173,7 @@ class TikTokVideoScraperMobile:
                 if '.webp' in tiktok_video_url:
                     path_filename = f'{video_id}___{count}.webp'
                 else:
-                    path_filename = f'{video_id}___{count}.mp4'
+                    path_filename = f'{video_id}___{count}.mp3'
             
             try:
                 with open(path_filename, 'wb') as f:
