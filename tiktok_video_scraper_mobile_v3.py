@@ -194,14 +194,33 @@ class TikTokVideoScraperMobile:
         """ get file size of requested video """
         filesizes = []
 
+        headers = {'user-agent': 'facebookexternalhit/1.1'}
+        
         for video_url in video_urls:
-            try:
-                video_size = self.tiktok_session.head(video_url, headers=self.headers, proxies=self.proxies)
-                filesizes.append(video_size.headers['content-length'])
-            except Exception as e:
-                print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
-                raise SystemExit('error getting video file size')
-
+            for attempt in range(50):
+                try:
+                    resp_head = requests.head(video_url, headers=headers, allow_redirects=True)
+                    if 'content-length' in resp_head.headers:
+                        filesizes.append(int(resp_head.headers['content-length']))
+                        break
+                    
+                    with requests.get(video_url, headers={**headers, 'Range': 'bytes=0-0'}, stream=True) as resp_get:
+                        if 'Content-Length' in resp_get.headers:
+                            filesizes.append(int(resp_get.headers['Content-Length']))
+                            break
+                        
+                        resp_full = requests.get(video_url, headers=headers, stream=True)
+                        resp_full.close()
+                        filesizes.append(int(resp_full.headers.get('Content-Length', 0)))
+                        break
+                        
+                except (requests.RequestException, KeyError, ValueError) as e:
+                    print(f"retry {attempt + 1} fail: {str(e)}")
+                    time.sleep(1)
+        
+        if not filesizes:
+            return None
+        
         return filesizes
 
 ##################################################################
