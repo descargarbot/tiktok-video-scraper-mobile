@@ -23,7 +23,7 @@
 <h2>use case example</h2>
 
     #import the class TikTokVideoScraperMobile
-    from tiktok_video_scraper_mobile_v3 import TikTokVideoScraperMobile
+    from tiktok_video_scraper_mobile_v2 import TikTokVideoScraperMobile
 
     # set tiktok url
     tiktok_url = 'your tiktok post'
@@ -38,7 +38,7 @@
     video_id = tiktok_video.get_video_id_by_url(tiktok_url)
     
     # get video url from video id
-    tiktok_video_urls, video_thumbnail = tiktok_video.get_video_data_by_video_id(video_id)
+    tiktok_video_urls, video_thumbnail = tiktok_video.get_video_data_by_video_id(video_id, max_workers=20)
 
     # get the video filesize
     videos_filesize = tiktok_video.get_video_filesize(tiktok_video_urls)
