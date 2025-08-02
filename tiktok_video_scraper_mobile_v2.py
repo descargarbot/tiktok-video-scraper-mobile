@@ -125,6 +125,7 @@ class TikTokVideoScraperMobile:
             return None
 
         random.shuffle(iid_did)
+        iid_did = iid_did[:400]
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             batch_size = max_workers * 2
