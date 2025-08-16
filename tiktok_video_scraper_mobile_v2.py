@@ -41,7 +41,10 @@ class TikTokVideoScraperMobile:
         # If the url is a short url, get web url
         if 'vm.' in tiktok_url or 'vt.' in tiktok_url or '/t/' in tiktok_url:
             try:
-                tiktok_url = self.tiktok_session.get(tiktok_url, headers=self.headers, proxies=self.proxies, timeout=60).url
+                tiktok_url = self.tiktok_session.get(tiktok_url, headers=self.headers, proxies=self.proxies, timeout=5).url
+            except requests.exceptions.Timeout:
+                print("timeout in get_video_id_by_url")
+                raise SystemExit("timeout in get_video_id_by_url")
             except Exception as e:
                 print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
                 raise SystemExit('error getting web url')
@@ -103,7 +106,7 @@ class TikTokVideoScraperMobile:
                         headers=self.headers, 
                         params=params, 
                         proxies=self.proxies, 
-                        timeout=30
+                        timeout=5
                     )
                     json_video_data = response.json()
                     
@@ -115,6 +118,9 @@ class TikTokVideoScraperMobile:
                     else:
                         break
                         
+                except requests.exceptions.Timeout:
+                    print("timeout in get_video_data_by_video_id")
+                    raise SystemExit("timeout in get_video_data_by_video_id")                        
                 except Exception as e:
                     if retry < max_retries - 1:
                         print(f"Error, retry {retry + 1} with iid: {params['iid']}, device_id: {params['device_id']} - {str(e)}")
@@ -242,8 +248,11 @@ class TikTokVideoScraperMobile:
 
         for video_url in video_urls:
             try:
-                video_size = self.tiktok_session.head(video_url, headers=self.headers, proxies=self.proxies)
+                video_size = self.tiktok_session.head(video_url, headers=self.headers, proxies=self.proxies, timeout=5)
                 filesizes.append(video_size.headers['content-length'])
+            except requests.exceptions.Timeout:
+                print("timeout in get_video_filesize")
+                raise SystemExit("timeout in get_video_filesize")
             except Exception as e:
                 print(e, "\nError on line {}".format(sys.exc_info()[-1].tb_lineno))
                 raise SystemExit('error getting video file size')
