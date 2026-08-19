@@ -39,7 +39,7 @@ class TikTokVideoScraperMobile:
         """ get video id """
 
         # If the url is a short url, get web url
-        if 'vm.' in tiktok_url or 'vt.' in tiktok_url or '/t/' in tiktok_url:
+        if 'vm.' in tiktok_url or 'vt.' in tiktok_url or '/t/' in tiktok_url or '/share/' in tiktok_url or '/@/' in tiktok_url:
             try:
                 tiktok_url = self.tiktok_session.get(tiktok_url, headers=self.headers, proxies=self.proxies, timeout=5).url
             except requests.exceptions.Timeout:
